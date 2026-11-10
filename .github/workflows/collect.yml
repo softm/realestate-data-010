@@ -1,0 +1,27 @@
+name: Collect regional transactions
+on:
+  push:
+    branches: [main]
+    paths: ['.github/workflows/collect.yml']
+  workflow_dispatch:
+    inputs:
+      mode:
+        type: choice
+        options: [bootstrap, build, auto, backfill, refresh]
+        default: bootstrap
+        description: 'bootstrap copies verified data; source collection requires completed handover'
+  schedule:
+    - cron: '47 * * * *'
+permissions:
+  contents: write
+  pages: write
+  id-token: write
+jobs:
+  regional:
+    if: github.event_name != 'schedule' || vars.COLLECTION_ENABLED == 'true'
+    uses: softm/softm.tojihannun/.github/workflows/realestate-shard.yml@5a19874f0e809c2d2b90c9814a0036a31d880e72
+    with:
+      engine_ref: 5a19874f0e809c2d2b90c9814a0036a31d880e72
+      mode: ${{ github.event_name == 'schedule' && 'auto' || inputs.mode || 'bootstrap' }}
+    secrets:
+      MOLIT_API_KEY: ${{ secrets.MOLIT_API_KEY }}
