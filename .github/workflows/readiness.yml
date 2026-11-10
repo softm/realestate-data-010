@@ -1,0 +1,17 @@
+name: Verify regional readiness
+on:
+  push:
+    branches: [main]
+    paths: ['.github/workflows/readiness.yml']
+  workflow_dispatch:
+permissions:
+  contents: write
+  pages: write
+  id-token: write
+jobs:
+  readiness:
+    uses: softm/softm.tojihannun/.github/workflows/prepare-data-shard.yml@987926511865f87ed7466ca3b7bef70eac555a73
+    with:
+      mode: bootstrap
+    secrets:
+      MOLIT_API_KEY: ${{ secrets.MOLIT_API_KEY }}
