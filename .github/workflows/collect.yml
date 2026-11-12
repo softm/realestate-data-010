@@ -9,9 +9,9 @@ on:
         type: choice
         options: [auto, backfill, refresh, build, bootstrap]
         default: auto
-        description: 'Resume verified checkpoints; auto combines historical collection and recent refresh'
+        description: 'Resume verified checkpoints and incomplete pages within existing request budgets'
   schedule:
-    - cron: '47 * * * *'
+    - cron: '35 * * * *'
 permissions:
   contents: write
   pages: write
@@ -19,9 +19,9 @@ permissions:
 jobs:
   regional:
     if: github.event_name != 'schedule' || vars.COLLECTION_ENABLED != 'false'
-    uses: softm/softm.tojihannun/.github/workflows/collection-worker.yml@0963c153924d2429dacf69dc82fdf61d0ceb4761
+    uses: softm/softm.tojihannun/.github/workflows/collection-worker.yml@3a29ba653e18b0844b82184d77b63a90bb992769
     with:
-      engine_ref: 0963c153924d2429dacf69dc82fdf61d0ceb4761
+      engine_ref: 3a29ba653e18b0844b82184d77b63a90bb992769
       mode: ${{ inputs.mode || 'auto' }}
     secrets:
       MOLIT_API_KEY: ${{ secrets.MOLIT_API_KEY }}
