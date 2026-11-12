@@ -1,0 +1,64 @@
+name: Finalize verified shard split to realestate-data-020
+on:
+  push:
+    branches: [main]
+    paths: ['.github/workflows/finalize-rebalance.yml']
+  workflow_dispatch:
+permissions:
+  contents: write
+concurrency:
+  group: regional-checkpoint-finalization
+  cancel-in-progress: false
+jobs:
+  finalize:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: main
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - uses: actions/checkout@v4
+        with:
+          repository: softm/softm.tojihannun
+          ref: 558f48cfbd8e181f88dfa6da5e7becfd915b0ff1
+          path: _control
+          persist-credentials: false
+          sparse-checkout: |
+            scripts/distribution
+            data/transactions/rebalance-plan.json
+      - uses: actions/checkout@v4
+        with:
+          repository: softm/realestate-data-010
+          ref: c11841fdb979f48068b7fa019634d995bddf02d0
+          path: _frozen
+          persist-credentials: false
+          sparse-checkout: data/transactions
+      - uses: actions/checkout@v4
+        with:
+          repository: softm/realestate-data-020
+          ref: main
+          path: _target
+          persist-credentials: false
+          sparse-checkout: |
+            data/transactions
+            migration-receipt.json
+      - name: Verify target and retire moved districts from active source state
+        run: |
+          python3 _control/scripts/distribution/finalize_rebalance.py \
+            --root . --frozen _frozen --target _target \
+            --plan _control/data/transactions/rebalance-plan.json \
+            --source realestate-data-010
+      - name: Persist active-state split while preserving source segment files
+        run: |
+          set -euo pipefail
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add -- data/transactions/collection-state.json data/transactions/rebalance-retired.json rebalance-source-finalized.json
+          if ! git diff --cached --quiet; then
+            git commit -m 'data: finalize verified district handover without deleting source segment files'
+            git pull --rebase origin main
+            git push origin HEAD:main
+          fi
