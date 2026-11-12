@@ -18,7 +18,7 @@ permissions:
   id-token: write
 jobs:
   regional:
-    if: github.event_name != 'schedule' || vars.COLLECTION_ENABLED != 'false'
+    if: false # rebalance maintenance pause
     uses: softm/softm.tojihannun/.github/workflows/collection-worker.yml@89af50ba66244cb7ffba7c46e3a4e03088bf52d7
     with:
       engine_ref: 89af50ba66244cb7ffba7c46e3a4e03088bf52d7
