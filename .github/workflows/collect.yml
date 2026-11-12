@@ -19,9 +19,9 @@ permissions:
 jobs:
   regional:
     if: github.event_name != 'schedule' || vars.COLLECTION_ENABLED != 'false'
-    uses: softm/softm.tojihannun/.github/workflows/collection-worker.yml@3a29ba653e18b0844b82184d77b63a90bb992769
+    uses: softm/softm.tojihannun/.github/workflows/collection-worker.yml@89af50ba66244cb7ffba7c46e3a4e03088bf52d7
     with:
-      engine_ref: 3a29ba653e18b0844b82184d77b63a90bb992769
+      engine_ref: 89af50ba66244cb7ffba7c46e3a4e03088bf52d7
       mode: ${{ inputs.mode || 'auto' }}
     secrets:
       MOLIT_API_KEY: ${{ secrets.MOLIT_API_KEY }}
